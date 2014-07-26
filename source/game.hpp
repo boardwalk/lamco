@@ -42,6 +42,7 @@ public:
     const Map& map() const;
     const Player& player() const;
     const Ghost& ghost(int ghostNum) const;
+    bool frightMode() const;
 
 private:
     void consume(Clock thisClock);
@@ -51,9 +52,7 @@ private:
     void queueEvent(Event event);
 
     bool eating() const;
-    bool frightMode() const;
     int level() const;
-    int remainingGhosts() const;
     int remainingPills() const;
 
     void dump(ostream& os) const;

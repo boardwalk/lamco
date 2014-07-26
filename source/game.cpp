@@ -145,14 +145,11 @@ void Game::run()
                 // game over
                 return;
             }
-
-            if(remainingGhosts() == 0)
+                
+            if(remainingPills() == 0)
             {
                 // game over, won
-                if(remainingPills() == 0)
-                {
-                    _score *= _lives + 1;
-                }
+                _score *= _lives + 1;
                 return;
             }
         }
@@ -169,14 +166,16 @@ void Game::run()
                 _map.set(_fruitPos, ' ');
                 break;
             case EventType::FRIGHT_MODE_EXPIRES:
-                // do nothing
+                for(auto& ghost : _ghosts)
+                {
+                    ghost.setInvisible(false);
+                }
                 break;
             case EventType::PLAYER_MOVES:
                 _player.step(_map);
                 queuePlayerMove(event.clock);
                 break;
             case EventType::GHOST_MOVES:
-                if(_ghosts[event.arg].dead()) { break; }
                 _ghosts[event.arg].step(*this);
                 queueGhostMove(event.clock, event.arg);
                 break;
@@ -231,7 +230,7 @@ void Game::collide()
 {
     for(auto& ghost : _ghosts)
     {
-        if(ghost.dead())
+        if(ghost.invisible())
         {
             continue;
         }
@@ -243,16 +242,19 @@ void Game::collide()
 
         if(frightMode())
         {
-            ghost.kill();
+            ghost.setInvisible(true);
+            ghost.reset();
             _score += _ghostValue;
             _ghostValue = min(_ghostValue * 2, MAX_GHOST_VALUE);
         }
         else
         {
+            // TODO clear fright mode
             _player.reset();
 
             for(auto& ghost2 : _ghosts)
             {
+                ghost2.setInvisible(false);
                 ghost2.reset();
             }
 
@@ -315,21 +317,6 @@ bool Game::frightMode() const
 int Game::level() const
 {
     return _map.width() * _map.height() / 100 + 1;
-}
-
-int Game::remainingGhosts() const
-{
-    auto numGhosts = 0;
-
-    for(auto& ghost : _ghosts)
-    {
-        if(!ghost.dead())
-        {
-            numGhosts++;
-        }
-    }
-
-    return numGhosts;
 }
 
 int Game::remainingPills() const

@@ -71,7 +71,7 @@ void Ghost::init(int ghostNum, Position pos, istream& is)
     _startPosition = pos;
     _position = pos;
     _direction = Direction::DOWN;
-    _dead = false;
+    _invisible = false;
 
     if(!is)
     {
@@ -159,9 +159,9 @@ void Ghost::reset()
     _position = _startPosition;
 }
 
-void Ghost::kill()
+void Ghost::setInvisible(bool newInvisible)
 {
-    _dead = true;
+    _invisible = newInvisible;
 }
 
 Position Ghost::position() const
@@ -169,9 +169,9 @@ Position Ghost::position() const
     return _position;
 }
 
-bool Ghost::dead() const
+bool Ghost::invisible() const
 {
-    return _dead;
+    return _invisible;
 }
 
 void Ghost::run(const Game& game)
@@ -279,9 +279,21 @@ void Ghost::handleInterrupt(const Game& game, int num)
             _registers[2] = _position.y;
             break;
         case 6:
-            // get ghost direction and status
+            // get ghost direction and vitality
             _registers[1] = (uint8_t)_direction;
-            _registers[2] = _dead; // FIXME
+
+            if(_invisible)
+            {
+                _registers[2] = 2;
+            }
+            else if(game.frightMode())
+            {
+                _registers[2] = 1;
+            }
+            else
+            {
+                _registers[2] = 0;
+            }
             break;
         case 7:
             // get map square
@@ -356,6 +368,11 @@ uint8_t Ghost::load(GhcArgument arg) const
 
 void Ghost::store(GhcArgument arg, uint8_t value)
 {
+    if(arg.isRegister && arg.value == 0)
+    {
+        throw logic_error("cannot store to program counter");
+    }
+
     if(arg.isIndirect)
     {
         if(arg.isRegister)

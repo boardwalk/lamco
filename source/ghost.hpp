@@ -36,11 +36,11 @@ public:
     void init(int ghostNum, Position pos, istream& is);
 
     void step(const Game& game);
-    void kill();
+    void setInvisible(bool newInvisible);
     void reset();
 
     Position position() const;
-    bool dead() const;
+    bool invisible() const;
 
 private:
     void run(const Game& game);
@@ -52,7 +52,7 @@ private:
     Position _startPosition;
     Position _position;
     Direction _direction;
-    bool _dead;
+    bool _invisible;
 
     vector<uint8_t> _registers;
     vector<uint8_t> _data;    
