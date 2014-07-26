@@ -354,7 +354,7 @@ int Game::remainingPills() const
         {
             auto ch = _map.get({x, y});
 
-            if(ch == '.' || ch == 'o')
+            if(ch == '.')
             {
                 numPills++;
             }
