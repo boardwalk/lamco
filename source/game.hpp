@@ -50,6 +50,7 @@ private:
     void queuePlayerMove(Clock thisClock);
     void queueGhostMove(Clock thisClock, int ghostNum);
     void queueEvent(Event event);
+    void clearFrightMode();
 
     bool eating() const;
     int level() const;

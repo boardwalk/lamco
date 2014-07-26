@@ -217,6 +217,7 @@ void Game::consume(Clock thisClock)
         _map.set(_player.position(), ' ');
         _score += POWER_PILL_VALUE;
         _ghostValue = FIRST_GHOST_VALUE;
+        clearFrightMode();
         queueEvent({EventType::FRIGHT_MODE_EXPIRES, thisClock, 0});
     }
     else if(ch == '%')
@@ -249,7 +250,8 @@ void Game::collide()
         }
         else
         {
-            // TODO clear fright mode
+            clearFrightMode();
+
             _player.reset();
 
             for(auto& ghost2 : _ghosts)
@@ -294,6 +296,29 @@ void Game::queueEvent(Event event)
 {
     _events.push_back(event);
     push_heap(_events.begin(), _events.end(), EventComparer{});
+}
+
+void Game::clearFrightMode()
+{
+    auto mustHeapify = false;
+
+    for(auto it = _events.begin(); it != _events.end(); /**/)
+    {
+        if(it->type == EventType::FRIGHT_MODE_EXPIRES)
+        {
+            it = _events.erase(it);
+            mustHeapify = true;
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    if(mustHeapify)
+    {
+        make_heap(_events.begin(), _events.end(), EventComparer {});
+    }
 }
 
 bool Game::eating() const
